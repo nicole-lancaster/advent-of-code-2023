@@ -16,7 +16,8 @@
   "scripts": {
     "test": "jest",
     "start": "ts-node",
-    "format": "prettier -w ."
+    "format": "prettier -w .",
+    "tsc": "tsc"
   },
   "repository": {
     "type": "git",
