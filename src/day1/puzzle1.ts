@@ -5,6 +5,9 @@ export const parsePuzzleInput = (inputFile: string): string[][] => {
     .readFileSync(`${__dirname}/${inputFile}`, "utf-8")
     .toString()
 
-  console.log(inputData)
-  return [[""]]
+  const singleLinesArray: string[] = inputData.split("\n")
+  const nestedArrayOfLines = singleLinesArray.map((line) => {
+    return [line]
+  })
+  return nestedArrayOfLines
 }
