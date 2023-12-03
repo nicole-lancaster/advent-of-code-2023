@@ -1,5 +1,6 @@
-import { parsePuzzleInput } from "./puzzle2";
+import { GameObjType, parseAndFormatPuzzleInput, solvingPuzzle } from "./puzzle2";
 
 const inputFile = "./puzzle-input.txt"
 
-const parsedPuzzleInput = parsePuzzleInput(inputFile)
+const parsedAndFormattedPuzzleInput: GameObjType[] = parseAndFormatPuzzleInput(inputFile)
+const puzzleAnswer: number = solvingPuzzle(parsedAndFormattedPuzzleInput)

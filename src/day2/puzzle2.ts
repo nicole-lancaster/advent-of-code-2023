@@ -1,11 +1,17 @@
 import fs from "fs"
 
-type GameSetsArray = string[]
-type GameObjType = {
+export type GameObjType = {
   [key: string]: GameSetsArray;
 };
+type GameSetsArray = string[]
+type CubesInBagType = {
+  blue: number,
+  green: number,
+  red: number
+}
+type GameSetObjType = { blue?: number, green?: number, red?: number }
 
-export const parsePuzzleInput = (inputFile: string): GameObjType[] => {
+export const parseAndFormatPuzzleInput = (inputFile: string): GameObjType[] => {
 
   let gameObj: GameObjType = {}
 
@@ -23,4 +29,31 @@ export const parsePuzzleInput = (inputFile: string): GameObjType[] => {
     return gameObj = { [game[0]]: gameSetsArray }
   })
   return formattedGames
+}
+
+export const solvingPuzzle = (parsedAndFormattedPuzzleInput: GameObjType[]): number => {
+  let sumOfGameIds = 0
+  let setArrayToObj: GameSetObjType = {}
+  const cubesInBag: CubesInBagType = { blue: 14, red: 12, green: 13 }
+
+  const arrayOfSingleSetArray = parsedAndFormattedPuzzleInput.map((game, index) => {
+    let gameSetArray: GameSetsArray = game[index + 1]
+    return gameSetArray.map((gameSet) => {
+      return gameSet.split(", ")
+    })
+  })
+
+  const separatingByColour = arrayOfSingleSetArray.flatMap((setArray) => {
+    return setArray.map((set) => set.flatMap((colour) => colour.split(" ")))
+  })
+
+  separatingByColour.forEach((set) => {
+    set.forEach((string, index) => {
+      if (string === "blue" || string === "green" || string === "red") {
+        const indexOfValueBeforeColour = set.indexOf(string) - 1
+        setArrayToObj[string] = parseInt(set[indexOfValueBeforeColour])
+      }
+    })
+  })
+  return sumOfGameIds
 }
