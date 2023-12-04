@@ -9,11 +9,11 @@ type CubesInBagType = {
   green: number,
   red: number
 }
-type GameSetObjType = { blue?: number, green?: number, red?: number }
+type ColorObject = Record<keyof CubesInBagType, number>;
+
+type GameValue = ColorObject[];
 
 export const parseAndFormatPuzzleInput = (inputFile: string): GameObjType[] => {
-
-  let gameObj: GameObjType = {}
 
   const inputData = fs
     .readFileSync(`${__dirname}/${inputFile}`, "utf-8")
@@ -24,36 +24,64 @@ export const parseAndFormatPuzzleInput = (inputFile: string): GameObjType[] => {
     return game.replaceAll("Game ", "")
   })
   const formattedGames = removedGameWord.map((game) => {
+
     const splitGameIdAndSets = game.split(": ")
+
     const gameSetsArray: GameSetsArray = splitGameIdAndSets[1].split("; ")
-    return gameObj = { [game[0]]: gameSetsArray }
+
+    const gameObj: GameObjType = { [splitGameIdAndSets[0]]: gameSetsArray }
+
+    return gameObj
   })
   return formattedGames
 }
 
 export const solvingPuzzle = (parsedAndFormattedPuzzleInput: GameObjType[]): number => {
-  let sumOfGameIds = 0
-  let setArrayToObj: GameSetObjType = {}
+  let sumOfGameIds: number = 0
   const cubesInBag: CubesInBagType = { blue: 14, red: 12, green: 13 }
 
-  const arrayOfSingleSetArray = parsedAndFormattedPuzzleInput.map((game, index) => {
-    let gameSetArray: GameSetsArray = game[index + 1]
-    return gameSetArray.map((gameSet) => {
-      return gameSet.split(", ")
-    })
+  const coloursAndValues = parsedAndFormattedPuzzleInput.map((singleGame) => {
+    const gameId = Object.keys(singleGame)[0];
+    const colourandNumOfCubesPerGame = singleGame[gameId].map((gameSet) => {
+      const colourValuePairs = gameSet.split(',').map((colourValuePair) => {
+        const [value, color] = colourValuePair.trim().split(' ');
+        return { [color]: parseInt(value) };
+      });
+      return Object.assign(colourValuePairs);
+    });
+    return { [gameId]: colourandNumOfCubesPerGame };
   })
 
-  const separatingByColour = arrayOfSingleSetArray.flatMap((setArray) => {
-    return setArray.map((set) => set.flatMap((colour) => colour.split(" ")))
-  })
+  const possibleGamesArray: number[] = []
+  coloursAndValues.forEach((game) => {
+    const gameIDKey = Object.keys(game)[0];
 
-  separatingByColour.forEach((set) => {
-    set.forEach((string, index) => {
-      if (string === "blue" || string === "green" || string === "red") {
-        const indexOfValueBeforeColour = set.indexOf(string) - 1
-        setArrayToObj[string] = parseInt(set[indexOfValueBeforeColour])
+    const gameValues: GameValue[] = game[gameIDKey];
+
+    const isGamePossible = (c: ColorObject) => {
+      let color: keyof ColorObject;
+      if (c.blue) {
+        color = "blue"
       }
-    })
+      else if (c.green) {
+        color = "green"
+      } else {
+        color = "red"
+      }
+      return c[color] <= cubesInBag[color]
+    }
+
+    const validGame = gameValues.every((a: GameValue) => {
+      return a.every(isGamePossible)
+    });
+
+    if (validGame) {
+      possibleGamesArray.push(parseInt(gameIDKey));
+    }
   })
-  return sumOfGameIds
+
+  possibleGamesArray.forEach((gameId: number) => {
+    sumOfGameIds += gameId;
+  });
+  return sumOfGameIds;
 }
